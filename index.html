@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Artigo Técnico Expandido: Modelagem Quantitativa do Potencial Coletivo através de Princípios da Física Quântica.">
+    <title>Artigo Expandido | Potencial Quântico Coletivo</title>
+    
+    <!-- Fontes e Renderização Matemática -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        :root {
+            --primary: #00f2ff;
+            --accent: #bc13fe;
+            --bg-dark: #050508;
+            --glass-panel: rgba(15, 15, 25, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0b0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        #dynamic-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #050508 0%, #0a0a20 100%);
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=2000');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.12;
+            z-index: -1;
+        }
+
+        .container { display: grid; grid-template-columns: 280px 1fr; max-width: 1400px; margin: 0 auto; gap: 40px; }
+
+        nav {
+            position: sticky;
+            top: 40px;
+            height: calc(100vh - 80px);
+            padding: 25px;
+            background: var(--glass-panel);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            overflow-y: auto;
+        }
+
+        nav h3 { font-size: 0.75rem; text-transform: uppercase; color: var(--primary); margin-bottom: 20px; letter-spacing: 2px; }
+        nav ul { list-style: none; }
+        nav li { margin-bottom: 10px; }
+        nav a { text-decoration: none; color: var(--text-muted); font-size: 0.85rem; transition: 0.3s; display: block; padding: 5px 0; }
+        nav a:hover { color: var(--primary); transform: translateX(5px); }
+
+        main { padding: 40px 0; }
+
+        .paper-section {
+            background: var(--glass-panel);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 4rem;
+            border-radius: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        header.hero { text-align: left; margin-bottom: 60px; padding-left: 10px; }
+        h1 { font-family: 'Playfair Display', serif; font-size: 3.2rem; margin-bottom: 20px; color: #fff; line-height: 1.1; }
+        
+        .abstract-box {
+            background: rgba(188, 19, 254, 0.07);
+            border-left: 4px solid var(--accent);
+            padding: 30px;
+            margin: 30px 0;
+            font-style: italic;
+            font-size: 1.05rem;
+        }
+
+        h2 { font-size: 1.9rem; margin: 2.5rem 0 1.5rem; color: var(--primary); border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; display: flex; align-items: center; gap: 15px; }
+        h3 { font-size: 1.4rem; margin: 2rem 0 1rem; color: #fff; font-weight: 600; }
+
+        p { margin-bottom: 1.5rem; text-align: justify; opacity: 0.95; }
+
+        .math-display {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border: 1px solid rgba(255,255,255,0.08);
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .highlight-box {
+            background: rgba(0, 242, 255, 0.05);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+        }
+
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin: 35px 0; }
+        .data-card { background: rgba(255,255,255,0.03); padding: 30px; border-radius: 20px; border: 1px solid var(--glass-border); transition: 0.3s; }
+        .data-card:hover { border-color: var(--primary); background: rgba(0, 242, 255, 0.05); }
+        .data-card strong { color: var(--primary); font-size: 2.2rem; display: block; margin-bottom: 10px; font-weight: 800; }
+
+        ul.theory-list { margin-left: 20px; margin-bottom: 20px; }
+        ul.theory-list li { margin-bottom: 10px; position: relative; list-style: none; padding-left: 20px; }
+        ul.theory-list li::before { content: '→'; position: absolute; left: 0; color: var(--accent); }
+
+        footer { padding: 60px; text-align: center; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--glass-border); }
+
+        @media (max-width: 1100px) {
+            .container { grid-template-columns: 1fr; padding: 15px; }
+            nav { display: none; }
+            .paper-section { padding: 2.5rem; }
+            h1 { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="dynamic-bg"></div>
+    <div class="bg-overlay"></div>
+
+    <div class="container">
+        <nav>
+            <h3>Sumário do Artigo</h3>
+            <ul>
+                <li><a href="#abstract">Resumo Analítico</a></li>
+                <li><a href="#fundamentacao">1. Fundamentação Teórica</a></li>
+                <li><a href="#formalismo">2. Formalismo Matemático</a></li>
+                <li><a href="#analise">3. Análise Quantitativa</a></li>
+                <li><a href="#generalizacoes">4. Generalizações</a></li>
+                <li><a href="#implicacoes">5. Implicações e Limites</a></li>
+                <li><a href="#conclusao">6. Conclusão Matemática</a></li>
+                <li><a href="#apendice">Apêndice Matemático</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <header class="hero">
+                <h1>Modelagem Quantitativa do Potencial Coletivo</h1>
+                <p style="font-size: 1.2rem; color: var(--text-muted);">Formalismo de Dirac aplicado a Sistemas Sociais Complexos</p>
+            </header>
+
+            <article id="abstract" class="paper-section">
+                <h2>Resumo Analítico Expandido</h2>
+                <div class="abstract-box">
+                    Este artigo desenvolve um modelo matemático baseado em analogias com a física quântica para quantificar limites teóricos de eficiência coletiva em sistemas complexos. Utilizando o formalismo de espaços de Hilbert e operadores, propomos uma estrutura para estimar como diferentes configurações de princípios sociais afetam o potencial realizável. O modelo opera exclusivamente no domínio matemático, abstendo-se deliberadamente de interpretações sociológicas ou culturais específicas.
+                </div>
+            </article>
+
+            <section id="fundamentacao" class="paper-section">
+                <h2>1. Fundamentação Teórica do Modelo</h2>
+                <h3>1.1 Espaço de Estados Coletivos</h3>
+                <p>Em mecânica quântica, um sistema físico é descrito por um vetor de estado \(\ket{\psi}\) num espaço de Hilbert \(\mathcal{H}\). Por analogia, definimos o <strong>espaço de estados coletivos</strong> \(\mathcal{H}_C\) onde cada vetor unitário representa uma configuração possível de princípios organizacionais.</p>
+                <p>A dimensão de \(\mathcal{H}_C\) é indeterminada mas presume-se finita, correspondendo ao número de modos de vida significativamente distintos. A base ortonormal \(\{\ket{e_i}\}_{i=1}^N\) representa os \(N\) modos puros disponíveis.</p>
+                
+                <h3>1.2 Operador Hamiltoniano Social</h3>
+                <p>A dinâmica do sistema é governada por um operador Hamiltoniano \(\hat{H} = \hat{H}_0 + \hat{V}\), onde \(\hat{H}_0\) representa energias intrínsecas e \(\hat{V}\) as interações entre modos. A evolução obedece à equação de Schrödinger:</p>
+                <div class="math-display">
+                    \[ i\hbar \frac{d}{dt} \ket{\psi(t)} = \hat{H} \ket{\psi(t)} \]
+                </div>
+                <p>Onde \(\hbar\) é uma constante de normalização social análoga à constante de Planck reduzida.</p>
+            </section>
+
+            <section id="formalismo" class="paper-section">
+                <h2>2. Formalismo Matemático Detalhado</h2>
+                <h3>2.1 Estados Puros e Misturas</h3>
+                <p>O estado atual dominante \(\ket{C}\) é uma mistura estatística representada pela matriz de densidade:</p>
+                <div class="math-display">
+                    \[ \rho_{atual} = 0.95\ket{C}\bra{C} + \sum_i \gamma_i \ket{A_i}\bra{A_i} \]
+                </div>
+                <p>Com \(Tr(\rho_{atual}) = 1\) e \(\gamma_i \ll 1\). A pureza \(Tr(\rho_{atual}^2) \approx 0.9025\) indica a alta dominância do modo \(\ket{C}\).</p>
+
+                <h3>2.2 Operador de Potencial Coletivo</h3>
+                <p>Definimos \(\hat{P}\) como um operador positivo semidefinido com representação espectral:</p>
+                <div class="math-display">
+                    \[ \hat{P} = \sum_{j=1}^N p_j \ket{\phi_j}\bra{\phi_j} \]
+                </div>
+                
+                <h3>2.3 Matriz de Potencial</h3>
+                <p>Em uma base arbitrária \(\{\ket{m_i}\}\), \(\hat{P}\) é representado por uma matriz \(N \times N\):</p>
+                <div class="math-display">
+                    \[ P_{ij} = \bra{m_i} \hat{P} \ket{m_j} \]
+                </div>
+                <p>Os elementos diagonais \(P_{ii}\) são eficiências intrínsecas; os <em>off-diagonais</em> \(P_{ij}\) capturam sinergias.</p>
+            </section>
+
+            <section id="analise" class="paper-section">
+                <h2>3. Análise Quantitativa Aprofundada</h2>
+                <h3>3.1 Cálculo de Valores Esperados</h3>
+                <p>Para um estado geral \(\ket{\psi} = \sum_i c_i \ket{m_i}\):</p>
+                <div class="math-display">
+                    \[ \langle \hat{P} \rangle_\psi = \sum_i |c_i|^2 P_{ii} + \sum_{i \neq j} c_i^* c_j P_{ij} \]
+                </div>
+
+                <h3>3.2 Caso 1: Adição Incoerente</h3>
+                <p>Numa mistura estatística (diversificação simples):</p>
+                <div class="math-display">
+                    \[ \langle \hat{P} \rangle_\rho = \frac{0.1 + 10 \times 0.01 \times 0.11}{1.1} P_{max} \approx 0.1009 P_{max} \]
+                </div>
+
+                <h3>3.3 Caso 2: Superposição Coerente</h3>
+                <p>Para um estado puro coerente com \(P_{CA} = 0.05 P_{max}\):</p>
+                <div class="math-display">
+                    \[ \langle \hat{P} \rangle_\psi = \frac{0.1 + 0.011 + 0.1}{1.1} P_{max} \approx 0.1918 P_{max} \]
+                </div>
+
+                <h3>3.4 Análise de Sensibilidade</h3>
+                <p>A derivada em relação ao termo de sinergia \(\frac{\partial \langle \hat{P} \rangle_\psi}{\partial P_{CA}} \approx 1.818\). Isto significa que cada incremento de 0.01 em \(P_{CA}\) aumenta o potencial em 0.018P<sub>max</sub>.</p>
+            </section>
+
+            <section id="generalizacoes" class="paper-section">
+                <h2>4. Generalizações e Extensões</h2>
+                <p>Sistemas reais sofrem <strong>decoerência</strong> via ruído social, modelado pela equação mestra de Lindblad:</p>
+                <div class="math-display">
+                    \[ \frac{d\rho}{dt} = -\frac{i}{\hbar}[\hat{H}, \rho] + \sum_i \gamma_i (L_i \rho L_i^\dagger - \frac{1}{2}\{L_i^\dagger L_i, \rho\}) \]
+                </div>
+                <p>Se a taxa de dissipação social \(\gamma_i\) for elevada, as superposições colapsam para o estado incoerente de 10.09%.</p>
+            </section>
+
+            <section id="implicacoes" class="paper-section">
+                <h2>5. Implicações Teóricas e Limitações</h2>
+                <ul class="theory-list">
+                    <li><strong>Ganho Marginal Incoerente:</strong> Simples diversificação gera melhorias mínimas (~0.9%).</li>
+                    <li><strong>Ganho Potencial Coerente:</strong> Sinergias sinérgicas podem quase dobrar a eficiência (~92%).</li>
+                    <li><strong>Limitações:</strong> Sistemas sociais são analogias; os operadores não são diretamente mensuráveis e interações podem ser não-lineares.</li>
+                </ul>
+            </section>
+
+            <section id="conclusao" class="paper-section">
+                <h2>6. Conclusão Matemática</h2>
+                <p>A transição de 10% para 19.18% requer <strong>engenharia de interferência construtiva</strong>. O fator limitante é a magnitude relativa dos termos <em>off-diagonais</em> na matriz de potencial.</p>
+                <div class="data-grid">
+                    <div class="data-card">
+                        <strong>10.09%</strong>
+                        <p>Adição Linear (Incoerente)</p>
+                    </div>
+                    <div class="data-card">
+                        <strong style="color: var(--primary);">19.18%</strong>
+                        <p>Superposição (Coerente)</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="apendice" class="paper-section">
+                <h2>Apêndice Matemático</h2>
+                <h3>A.1 Diagonalização</h3>
+                <p>Para a matriz simplificada, o autovalor máximo é \(p_1 \approx 0.1918\). O autovetor ótimo é:</p>
+                <div class="math-display">
+                    \[ \ket{\phi_1} \approx 0.688 \ket{C} + 0.725 \sum \frac{\ket{A_i}}{\sqrt{10}} \]
+                </div>
+                <h3>A.2 Desigualdade de Cauchy-Schwarz</h3>
+                <p>O limite teórico máximo para o termo de interferência é \(P_{CA} \leq \sqrt{P_{CC} P_{AA}} \approx 0.1049\). O modelo utiliza \(0.05\), indicando que há margem para ganhos superiores a 19%.</p>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>© 2025 Modelagem Quântica Social | Referências: Dirac (1930), Von Neumann (1932), Sakurai (1994).</p>
+    </footer>
+
+    <script>
+        // Efeito de Parallax
+        window.addEventListener('scroll', () => {
+            const scroll = window.pageYOffset;
+            document.querySelector('.bg-overlay').style.transform = `translateY(${scroll * 0.2}px)`;
+        });
+
+        // Navegação Ativa
+        const sections = document.querySelectorAll('.paper-section');
+        const navLinks = document.querySelectorAll('nav a');
+        window.addEventListener('scroll', () => {
+            let current = "";
+            sections.forEach(s => { if (pageYOffset >= s.offsetTop - 150) current = s.getAttribute('id'); });
+            navLinks.forEach(l => {
+                l.style.color = l.getAttribute('href').includes(current) ? "var(--primary)" : "var(--text-muted)";
+                l.style.fontWeight = l.getAttribute('href').includes(current) ? "700" : "400";
+            });
+        });
+    </script>
+</body>
+</html>
