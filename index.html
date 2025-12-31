@@ -9,7 +9,16 @@
     <!-- Fontes e Renderização Matemática -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <style>
@@ -17,53 +26,322 @@
             --primary: #00f2ff;
             --accent: #bc13fe;
             --bg-dark: #050508;
-            --glass-panel: rgba(15, 15, 25, 0.9);
-            --glass-border: rgba(40, 58, 42, 0.1);
+            --glass-panel: rgba(15, 15, 25, 0.95);
+            --glass-border: rgba(40, 58, 42, 0.2);
             --text-main: #c9d1a6;
             --text-muted: #b0b895;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            scroll-behavior: smooth; 
+        }
 
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-dark);
             color: var(--text-main);
             line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
         }
 
+        /* ==================== */
+        /* MENU HAMBURGUER SUPERIOR */
+        /* ==================== */
+        .menu-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 10000;
+            padding: 15px 20px;
+            background: rgba(5, 5, 8, 0.85);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(0, 242, 255, 0.1);
+        }
+
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .site-title {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary);
+            font-size: 1.8rem;
+            text-decoration: none;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .site-title:hover {
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .menu-toggle {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 242, 255, 0.1);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 10002;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(0, 242, 255, 0.2);
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .menu-toggle.active {
+            background: rgba(188, 19, 254, 0.2);
+            border-color: var(--accent);
+            transform: rotate(90deg);
+        }
+
+        .menu-toggle span {
+            display: block;
+            width: 25px;
+            height: 2px;
+            background: var(--primary);
+            transition: all 0.3s ease;
+            border-radius: 1px;
+        }
+
+        .menu-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+            background: var(--accent);
+        }
+
+        .menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+            background: var(--accent);
+        }
+
+        /* Menu Overlay */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 8, 0.95);
+            backdrop-filter: blur(25px);
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            padding: 100px 20px 40px;
+            overflow-y: auto;
+        }
+
+        .menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .menu-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 18px 25px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .menu-item:hover {
+            background: linear-gradient(135deg, 
+                rgba(0, 242, 255, 0.15) 0%, 
+                rgba(188, 19, 254, 0.15) 100%);
+            border-color: rgba(0, 242, 255, 0.3);
+            color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 
+                0 10px 25px rgba(0, 242, 255, 0.2),
+                0 5px 15px rgba(188, 19, 254, 0.15);
+        }
+
+        .menu-item::before {
+            content: '✦';
+            position: absolute;
+            left: 15px;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .menu-item:hover::before {
+            opacity: 1;
+            color: var(--accent);
+            transform: rotate(90deg);
+        }
+
+        /* ==================== */
+        /* BARRA DE SCROLL CUSTOMIZADA */
+        /* ==================== */
+        ::-webkit-scrollbar {
+            width: 14px;
+            height: 14px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 15, 25, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 242, 255, 0.1);
+            margin: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(
+                135deg,
+                rgba(0, 242, 255, 0.7) 0%,
+                rgba(188, 19, 254, 0.7) 100%
+            );
+            border-radius: 10px;
+            border: 2px solid rgba(15, 15, 25, 0.8);
+            box-shadow: 
+                0 0 15px rgba(0, 242, 255, 0.3),
+                inset 0 0 10px rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(
+                135deg,
+                rgba(0, 242, 255, 0.9) 0%,
+                rgba(188, 19, 254, 0.9) 100%
+            );
+            box-shadow: 
+                0 0 25px rgba(0, 242, 255, 0.5),
+                0 0 15px rgba(188, 19, 254, 0.4),
+                inset 0 0 15px rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+        }
+
+        ::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(
+                135deg,
+                rgba(0, 242, 255, 1) 0%,
+                rgba(188, 19, 254, 1) 100%
+            );
+            box-shadow: 
+                0 0 30px rgba(0, 242, 255, 0.8),
+                inset 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        ::-webkit-scrollbar-corner {
+            background: rgba(15, 15, 25, 0.8);
+            border-radius: 0 0 10px 0;
+        }
+
+        /* Para Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 242, 255, 0.7) rgba(15, 15, 25, 0.4);
+        }
+
+        /* Barra de scroll para o menu overlay */
+        .menu-overlay::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .menu-overlay::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-overlay::-webkit-scrollbar-thumb {
+            background: linear-gradient(
+                180deg,
+                rgba(0, 242, 255, 0.6) 0%,
+                rgba(188, 19, 254, 0.6) 100%
+            );
+        }
+
+        /* ==================== */
+        /* FUNDO E OVERLAY */
+        /* ==================== */
         #dynamic-bg {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            z-index: -2;
             background: linear-gradient(135deg, #050508 0%, #0a0a20 100%);
         }
 
         .bg-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
             background-image: url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=2000');
             background-size: cover;
             background-position: center;
-            opacity: 0.12;
+            opacity: 0.08;
             z-index: -1;
         }
 
+        /* ==================== */
+        /* LAYOUT PRINCIPAL */
+        /* ==================== */
         .container { 
             display: grid; 
-            grid-template-columns: 300px 1fr; 
-            max-width: 1500px; 
-            margin: 0 auto; 
-            gap: 40px;
-            padding: 20px;
+            grid-template-columns: 280px 1fr; 
+            max-width: 1400px; 
+            margin: 100px auto 40px;
+            gap: 30px;
+            padding: 0 20px;
         }
 
-        /* MENU LATERAL EXPANDIDO */
+        /* ==================== */
+        /* MENU LATERAL ARTIGOS */
+        /* ==================== */
         nav {
             position: sticky;
-            top: 40px;
-            height: calc(100vh - 80px);
-            padding: 30px;
+            top: 100px;
+            height: calc(100vh - 140px);
+            padding: 25px;
             background: var(--glass-panel);
             backdrop-filter: blur(15px);
             border-radius: 20px;
@@ -72,7 +350,7 @@
         }
 
         .nav-header {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             padding-bottom: 20px;
             border-bottom: 1px solid var(--glass-border);
         }
@@ -80,31 +358,31 @@
         .nav-header h2 {
             font-family: 'Playfair Display', serif;
             color: var(--primary);
-            font-size: 1.8rem;
-            margin-bottom: 10px;
+            font-size: 1.6rem;
+            margin-bottom: 8px;
         }
 
         .nav-header p {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
         }
 
         .article-selector {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .article-btn {
             display: block;
             width: 100%;
-            padding: 15px 20px;
+            padding: 14px 18px;
             margin-bottom: 10px;
             background: rgba(0, 242, 255, 0.05);
-            border: 1px solid rgba(0, 242, 255, 0.2);
-            border-radius: 12px;
+            border: 1px solid rgba(0, 242, 255, 0.15);
+            border-radius: 10px;
             color: var(--text-main);
             font-family: 'Inter', sans-serif;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: left;
@@ -121,28 +399,29 @@
             border-color: var(--primary);
             color: var(--primary);
             box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+            transform: translateX(0);
         }
 
         .article-subtitle {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
-            margin-top: 5px;
+            margin-top: 4px;
             font-weight: 400;
         }
 
         .toc-section {
-            margin-top: 30px;
+            margin-top: 25px;
         }
 
         .toc-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .toc-header h3 {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
             color: var(--primary);
             letter-spacing: 2px;
@@ -164,18 +443,18 @@
         }
 
         .toc-list li {
-            margin-bottom: 12px;
-            position: relative;
+            margin-bottom: 10px;
         }
 
         .toc-list a {
             text-decoration: none;
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            padding: 5px 0;
+            padding: 6px 0;
+            cursor: pointer;
         }
 
         .toc-list a:hover {
@@ -186,7 +465,7 @@
         .toc-list a::before {
             content: '▸';
             margin-right: 10px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--accent);
             transition: transform 0.3s;
         }
@@ -195,8 +474,12 @@
             transform: rotate(90deg);
         }
 
+        /* ==================== */
         /* CONTEÚDO PRINCIPAL */
-        main { padding: 40px 0; }
+        /* ==================== */
+        main { 
+            padding: 20px 0; 
+        }
 
         .article-content {
             display: none;
@@ -208,98 +491,116 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
         }
 
         .paper-section {
             background: var(--glass-panel);
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            padding: 4rem;
-            border-radius: 30px;
-            margin-bottom: 40px;
+            padding: 3rem;
+            border-radius: 25px;
+            margin-bottom: 30px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
 
-        header.hero { 
+        .hero { 
             text-align: left; 
-            margin-bottom: 60px; 
-            padding-left: 10px; 
+            margin-bottom: 50px; 
+            padding: 0 10px;
         }
 
         h1 { 
             font-family: 'Playfair Display', serif; 
-            font-size: 3.2rem; 
+            font-size: 3rem; 
             margin-bottom: 20px; 
             color: #fff; 
-            line-height: 1.1; 
+            line-height: 1.1;
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+        }
+        
+        .hero p {
+            font-size: 1.2rem; 
+            color: var(--text-muted);
         }
         
         .abstract-box {
             background: rgba(188, 19, 254, 0.07);
             border-left: 4px solid var(--accent);
-            padding: 30px;
-            margin: 30px 0;
+            padding: 25px;
+            margin: 25px 0;
             font-style: italic;
             font-size: 1.05rem;
+            border-radius: 0 10px 10px 0;
         }
 
         h2 { 
-            font-size: 1.9rem; 
-            margin: 2.5rem 0 1.5rem; 
+            font-size: 1.8rem; 
+            margin: 2rem 0 1.2rem; 
             color: var(--primary); 
             border-bottom: 1px solid var(--glass-border); 
             padding-bottom: 10px; 
             display: flex; 
             align-items: center; 
-            gap: 15px; 
+            gap: 12px; 
         }
 
         h2::before {
             content: '§';
             color: var(--accent);
-            font-size: 1.5rem;
+            font-size: 1.4rem;
         }
 
         h3 { 
-            font-size: 1.4rem; 
-            margin: 2rem 0 1rem; 
+            font-size: 1.3rem; 
+            margin: 1.5rem 0 1rem; 
             color: #fff; 
             font-weight: 600; 
         }
 
-        p { margin-bottom: 1.5rem; text-align: justify; opacity: 0.95; }
+        p { 
+            margin-bottom: 1.2rem; 
+            text-align: justify; 
+            opacity: 0.95; 
+        }
 
         .math-display {
             background: rgba(0, 0, 0, 0.4);
-            padding: 25px;
-            border-radius: 15px;
-            margin: 25px 0;
+            padding: 22px;
+            border-radius: 12px;
+            margin: 20px 0;
             border: 1px solid rgba(255,255,255,0.08);
             text-align: center;
             overflow-x: auto;
+            font-size: 1.05rem;
         }
 
         .highlight-box {
             background: rgba(0, 242, 255, 0.05);
             border: 1px solid rgba(0, 242, 255, 0.3);
-            padding: 25px;
-            border-radius: 15px;
-            margin: 25px 0;
+            padding: 22px;
+            border-radius: 12px;
+            margin: 20px 0;
         }
 
         .data-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-            gap: 25px; 
-            margin: 35px 0; 
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+            gap: 20px; 
+            margin: 30px 0; 
         }
 
         .data-card { 
             background: rgba(255,255,255,0.03); 
-            padding: 30px; 
-            border-radius: 20px; 
+            padding: 25px; 
+            border-radius: 15px; 
             border: 1px solid var(--glass-border); 
             transition: 0.3s; 
         }
@@ -307,13 +608,14 @@
         .data-card:hover { 
             border-color: var(--primary); 
             background: rgba(0, 242, 255, 0.05); 
+            transform: translateY(-5px);
         }
 
         .data-card strong { 
             color: var(--primary); 
-            font-size: 2.2rem; 
+            font-size: 2rem; 
             display: block; 
-            margin-bottom: 10px; 
+            margin-bottom: 8px; 
             font-weight: 800; 
         }
 
@@ -323,7 +625,7 @@
         }
 
         .theory-list li { 
-            margin-bottom: 10px; 
+            margin-bottom: 8px; 
             position: relative; 
             list-style: none; 
             padding-left: 20px; 
@@ -339,7 +641,7 @@
         .competition-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 30px 0;
+            margin: 25px 0;
             background: rgba(0,0,0,0.3);
             border-radius: 10px;
             overflow: hidden;
@@ -347,14 +649,14 @@
 
         .competition-table th {
             background: rgba(0, 242, 255, 0.1);
-            padding: 15px;
+            padding: 14px;
             text-align: left;
             font-weight: 600;
             color: var(--primary);
         }
 
         .competition-table td {
-            padding: 15px;
+            padding: 14px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
@@ -363,51 +665,169 @@
         }
 
         footer { 
-            padding: 60px; 
+            padding: 50px 20px; 
             text-align: center; 
             color: var(--text-muted); 
             font-size: 0.85rem; 
             border-top: 1px solid var(--glass-border); 
             margin-top: 60px;
+            background: rgba(5, 5, 8, 0.8);
         }
 
+        /* ==================== */
         /* RESPONSIVIDADE */
+        /* ==================== */
         @media (max-width: 1100px) {
             .container { 
                 grid-template-columns: 1fr; 
-                padding: 15px; 
+                margin-top: 90px;
             }
             
             nav { 
-                position: relative; 
-                top: 0; 
+                position: static; 
                 height: auto; 
                 margin-bottom: 30px; 
+                top: 0;
             }
             
-            .paper-section { padding: 2.5rem; }
+            .paper-section { 
+                padding: 2rem; 
+            }
             
-            h1 { font-size: 2.5rem; }
+            h1 { 
+                font-size: 2.3rem; 
+            }
+            
+            .menu-content {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
         }
 
         @media (max-width: 768px) {
-            .paper-section { padding: 1.5rem; }
+            .paper-section { 
+                padding: 1.5rem; 
+            }
             
-            h1 { font-size: 2rem; }
+            h1 { 
+                font-size: 2rem; 
+            }
             
-            h2 { font-size: 1.5rem; }
+            h2 { 
+                font-size: 1.5rem; 
+            }
             
-            .data-grid { grid-template-columns: 1fr; }
+            h3 {
+                font-size: 1.2rem;
+            }
+            
+            .data-grid { 
+                grid-template-columns: 1fr; 
+            }
+            
+            .menu-container {
+                padding: 12px 15px;
+            }
+            
+            .site-title {
+                font-size: 1.5rem;
+            }
+            
+            .menu-toggle {
+                width: 44px;
+                height: 44px;
+            }
+            
+            .menu-content {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+            
+            .menu-item {
+                padding: 16px 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .paper-section {
+                padding: 1.2rem;
+            }
+            
+            .hero {
+                margin-bottom: 30px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
         }
     </style>
 </head>
 <body>
 
+    <!-- Menu Hamburger Superior Fixo -->
+    <div class="menu-container">
+        <div class="menu-header">
+            <a href="#" class="site-title">Artigos Técnicos</a>
+            <div class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Overlay -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-content">
+            <a href="https://alexxanorafa.github.io/Alquimia-dos-Sentimentos/" class="menu-item">Alquimia dos Sentimentos</a>
+            <a href="https://alexxanorafa.github.io/Almas-Conectadas/" class="menu-item">Almas Conectadas</a>
+            <a href="https://alexxanorafa.github.io/Aneis_da_Sabedoria/" class="menu-item">Anéis da Sabedoria</a>
+            <a href="https://alexxanorafa.github.io/Animais-de-Poder/" class="menu-item">Animais de Poder</a>
+            <a href="https://alexxanorafa.github.io/Biblioteca-Onirica/" class="menu-item">Biblioteca Onirica</a>
+            <a href="https://alexxanorafa.github.io/Buzios/" class="menu-item">Buzios</a>
+            <a href="https://alexxanorafa.github.io/Cartas-de-Sibila/" class="menu-item">Cartas de Sibila</a>
+            <a href="https://alexxanorafa.github.io/Do-you-love-me/" class="menu-item">Do you love me?</a>
+            <a href="https://alexxanorafa.github.io/I-Ching-Virtual/" class="menu-item">I Ching Virtual</a>
+            <a href="https://alexxanorafa.github.io/Jogo-Didatico-Banco-de-Dados/" class="menu-item">Jogo Didatico Banco de Dados</a>
+            <a href="https://alexxanorafa.github.io/Jornada-Arquetipica/" class="menu-item">Jornada Arquetípica</a>
+            <a href="https://alexxanorafa.github.io/Jornadas-Mitologica/" class="menu-item">Jornada Mitológica</a>
+            <a href="https://alexxanorafa.github.io/Kabbalah-Interativa/" class="menu-item">Kabbalah Interativa</a>
+            <a href="https://alexxanorafa.github.io/Livro-das-Sombras/" class="menu-item">Livro das Sombras</a>
+            <a href="https://alexxanorafa.github.io/Magia-das-Cores/" class="menu-item">Magia das Cores</a>
+            <a href="https://alexxanorafa.github.io/Murmurios-do-Destino/" class="menu-item">Murmúrios do Destino</a>
+            <a href="https://alexxanorafa.github.io/O-Construtor-do-Destino/" class="menu-item">O Construtor do Destino</a>
+            <a href="https://alexxanorafa.github.io/Oraculo-das-Pedras/" class="menu-item">Oráculo das Pedras</a>
+            <a href="https://alexxanorafa.github.io/Oraculo-dos-Deuses/" class="menu-item">Oráculo dos Deuses</a>
+            <a href="https://alexxanorafa.github.io/Oraculo-Numerologico/" class="menu-item">Oráculo Numerológico</a>
+            <a href="https://alexxanorafa.github.io/Pendulo-Divinatorio/" class="menu-item">Pendulo Divinatorio</a>
+            <a href="https://alexxanorafa.github.io/Portal-das-Almas/" class="menu-item">Portal das Almas</a>
+            <a href="https://alexxanorafa.github.io/Runas-Celtas/" class="menu-item">Runas Celtas</a>
+            <a href="https://alexxanorafa.github.io/Runas-Estelares/" class="menu-item">Runas Estelares</a>
+            <a href="https://alexxanorafa.github.io/Runas-do-Destino/" class="menu-item">Runas Nórdicas</a>
+            <a href="https://alexxanorafa.github.io/Tabuleiro-Quantico/" class="menu-item">Tabuleiro Quantico</a>
+            <a href="https://alexxanorafa.github.io/TarodeMarselha/" class="menu-item">Tarô de Marselha</a>
+            <a href="https://alexxanorafa.github.io/Tasseografia/" class="menu-item">Tasseografia</a>
+            <a href="https://alexxanorafa.github.io/Tempo_e_Sonhos/" class="menu-item">Tempo e Sonhos</a>
+            <a href="https://alexxanorafa.github.io/The-Da-Vinci-Code/" class="menu-item">The Da Vinci Code</a>
+            <a href="https://alexxanorafa.github.io/Whispering-Shadows/" class="menu-item">Whispering Shadows</a>
+            <a href="https://alexxanorafa.github.io/Whispering-Shadows-2/" class="menu-item">Whispering Shadows 2</a>
+            <a href="https://alexxanorafa.github.io/Whispering-Shadows-3/" class="menu-item">Whispering Shadows 3</a>
+            <a href="https://alexxanorafa.github.io/Xamanismo-Animal/" class="menu-item">Xamanismo Animal</a>
+        </div>
+    </div>
+
+    <!-- Fundo e Overlay -->
     <div id="dynamic-bg"></div>
     <div class="bg-overlay"></div>
 
+    <!-- Container Principal -->
     <div class="container">
-        <!-- MENU LATERAL -->
+        <!-- Menu Lateral Artigos -->
         <nav>
             <div class="nav-header">
                 <h2>Artigos Técnicos</h2>
@@ -425,52 +845,46 @@
                 </button>
             </div>
 
-            <!-- SUMÁRIO DO ARTIGO COLETIVO -->
+            <!-- Sumário Artigo Coletivo -->
             <div class="toc-section" id="toc-coletivo">
                 <div class="toc-header">
                     <h3>Sumário do Artigo</h3>
                     <span class="article-indicator">Coletivo</span>
                 </div>
                 <ul class="toc-list">
-                    <li><a href="#abstract-coletivo">Resumo Analítico</a></li>
-                    <li><a href="#fundamentacao-coletivo">1. Fundamentação Teórica</a></li>
-                    <li><a href="#formalismo-coletivo">2. Formalismo Matemático</a></li>
-                    <li><a href="#analise-coletivo">3. Análise Quantitativa</a></li>
-                    <li><a href="#generalizacoes-coletivo">4. Generalizações</a></li>
-                    <li><a href="#implicacoes-coletivo">5. Implicações e Limites</a></li>
-                    <li><a href="#conclusao-coletivo">6. Conclusão Matemática</a></li>
-                    <li><a href="#apendice-coletivo">Apêndice Matemático</a></li>
+                    <li><a onclick="scrollToSection('abstract-coletivo')">Resumo Analítico</a></li>
+                    <li><a onclick="scrollToSection('fundamentacao-coletivo')">1. Fundamentação Teórica</a></li>
+                    <li><a onclick="scrollToSection('formalismo-coletivo')">2. Formalismo Matemático</a></li>
+                    <li><a onclick="scrollToSection('analise-coletivo')">3. Análise Quantitativa</a></li>
+                    <li><a onclick="scrollToSection('conclusao-coletivo')">6. Conclusão Matemática</a></li>
                 </ul>
             </div>
 
-            <!-- SUMÁRIO DO ARTIGO DOWNHILL -->
+            <!-- Sumário Artigo Downhill -->
             <div class="toc-section" id="toc-downhill" style="display: none;">
                 <div class="toc-header">
                     <h3>Sumário do Artigo</h3>
                     <span class="article-indicator">Downhill</span>
                 </div>
                 <ul class="toc-list">
-                    <li><a href="#abstract-downhill">Resumo Executivo</a></li>
-                    <li><a href="#espaco-estados">1. Espaço de Estados</a></li>
-                    <li><a href="#operador-downhill">2. Operador de Desempenho</a></li>
-                    <li><a href="#parametros-downhill">3. Parâmetros Específicos</a></li>
-                    <li><a href="#estado-treino">4. Estado com Treino Convencional</a></li>
-                    <li><a href="#integracao-downhill">5. Integração de Estados</a></li>
-                    <li><a href="#calculos-downhill">6. Cálculos de Desempenho</a></li>
-                    <li><a href="#aplicacoes-downhill">7. Aplicações Práticas</a></li>
-                    <li><a href="#conclusao-downhill">8. Conclusões</a></li>
+                    <li><a onclick="scrollToSection('abstract-downhill')">Resumo Executivo</a></li>
+                    <li><a onclick="scrollToSection('espaco-estados')">1. Espaço de Estados</a></li>
+                    <li><a onclick="scrollToSection('operador-downhill')">2. Operador de Desempenho</a></li>
+                    <li><a onclick="scrollToSection('parametros-downhill')">3. Parâmetros Específicos</a></li>
+                    <li><a onclick="scrollToSection('calculos-downhill')">6. Cálculos de Desempenho</a></li>
+                    <li><a onclick="scrollToSection('conclusao-downhill')">8. Conclusões</a></li>
                 </ul>
             </div>
         </nav>
 
-        <!-- CONTEÚDO PRINCIPAL -->
+        <!-- Conteúdo Principal -->
         <main>
-            <!-- ARTIGO 1: POTENCIAL COLETIVO -->
+            <!-- Artigo 1: Potencial Coletivo -->
             <article id="coletivo" class="article-content active">
-                <header class="hero">
+                <div class="hero">
                     <h1>Modelagem Quantitativa do Potencial Coletivo</h1>
-                    <p style="font-size: 1.2rem; color: var(--text-muted);">Formalismo de Dirac aplicado a Sistemas Sociais Complexos</p>
-                </header>
+                    <p>Formalismo de Dirac aplicado a Sistemas Sociais Complexos</p>
+                </div>
 
                 <section id="abstract-coletivo" class="paper-section">
                     <h2>Resumo Analítico Expandido</h2>
@@ -482,13 +896,13 @@
                 <section id="fundamentacao-coletivo" class="paper-section">
                     <h2>1. Fundamentação Teórica do Modelo</h2>
                     <h3>1.1 Espaço de Estados Coletivos</h3>
-                    <p>Em mecânica quântica, um sistema físico é descrito por um vetor de estado \(\ket{\psi}\) num espaço de Hilbert \(\mathcal{H}\). Por analogia, definimos o <strong>espaço de estados coletivos</strong> \(\mathcal{H}_C\) onde cada vetor unitário representa uma configuração possível de princípios organizacionais.</p>
-                    <p>A dimensão de \(\mathcal{H}_C\) é indeterminada mas presume-se finita, correspondendo ao número de modos de vida significativamente distintos. A base ortonormal \(\{\ket{e_i}\}_{i=1}^N\) representa os \(N\) modos puros disponíveis.</p>
+                    <p>Em mecânica quântica, um sistema físico é descrito por um vetor de estado \(|\psi\rangle\) num espaço de Hilbert \(\mathcal{H}\). Por analogia, definimos o <strong>espaço de estados coletivos</strong> \(\mathcal{H}_C\) onde cada vetor unitário representa uma configuração possível de princípios organizacionais.</p>
+                    <p>A dimensão de \(\mathcal{H}_C\) é indeterminada mas presume-se finita, correspondendo ao número de modos de vida significativamente distintos. A base ortonormal \(\{|e_i\rangle\}_{i=1}^N\) representa os \(N\) modos puros disponíveis.</p>
                     
                     <h3>1.2 Operador Hamiltoniano Social</h3>
                     <p>A dinâmica do sistema é governada por um operador Hamiltoniano \(\hat{H} = \hat{H}_0 + \hat{V}\), onde \(\hat{H}_0\) representa energias intrínsecas e \(\hat{V}\) as interações entre modos. A evolução obedece à equação de Schrödinger:</p>
                     <div class="math-display">
-                        \[ i\hbar \frac{d}{dt} \ket{\psi(t)} = \hat{H} \ket{\psi(t)} \]
+                        \[ i\hbar \frac{d}{dt} |\psi(t)\rangle = \hat{H} |\psi(t)\rangle \]
                     </div>
                     <p>Onde \(\hbar\) é uma constante de normalização social análoga à constante de Planck reduzida.</p>
                 </section>
@@ -496,22 +910,22 @@
                 <section id="formalismo-coletivo" class="paper-section">
                     <h2>2. Formalismo Matemático Detalhado</h2>
                     <h3>2.1 Estados Puros e Misturas</h3>
-                    <p>O estado atual dominante \(\ket{C}\) é uma mistura estatística representada pela matriz de densidade:</p>
+                    <p>O estado atual dominante \(|C\rangle\) é uma mistura estatística representada pela matriz de densidade:</p>
                     <div class="math-display">
-                        \[ \rho_{atual} = 0.95\ket{C}\bra{C} + \sum_i \gamma_i \ket{A_i}\bra{A_i} \]
+                        \[ \rho_{\text{atual}} = 0.95|C\rangle\langle C| + \sum_i \gamma_i |A_i\rangle\langle A_i| \]
                     </div>
-                    <p>Com \(Tr(\rho_{atual}) = 1\) e \(\gamma_i \ll 1\). A pureza \(Tr(\rho_{atual}^2) \approx 0.9025\) indica a alta dominância do modo \(\ket{C}\).</p>
+                    <p>Com \(\text{Tr}(\rho_{\text{atual}}) = 1\) e \(\gamma_i \ll 1\). A pureza \(\text{Tr}(\rho_{\text{atual}}^2) \approx 0.9025\) indica a alta dominância do modo \(|C\rangle\).</p>
 
                     <h3>2.2 Operador de Potencial Coletivo</h3>
                     <p>Definimos \(\hat{P}\) como um operador positivo semidefinido com representação espectral:</p>
                     <div class="math-display">
-                        \[ \hat{P} = \sum_{j=1}^N p_j \ket{\phi_j}\bra{\phi_j} \]
+                        \[ \hat{P} = \sum_{j=1}^N p_j |\phi_j\rangle\langle\phi_j| \]
                     </div>
                     
                     <h3>2.3 Matriz de Potencial</h3>
-                    <p>Em uma base arbitrária \(\{\ket{m_i}\}\), \(\hat{P}\) é representado por uma matriz \(N \times N\):</p>
+                    <p>Em uma base arbitrária \(\{|m_i\rangle\}\), \(\hat{P}\) é representado por uma matriz \(N \times N\):</p>
                     <div class="math-display">
-                        \[ P_{ij} = \bra{m_i} \hat{P} \ket{m_j} \]
+                        \[ P_{ij} = \langle m_i| \hat{P} |m_j\rangle \]
                     </div>
                     <p>Os elementos diagonais \(P_{ii}\) são eficiências intrínsecas; os <em>off-diagonais</em> \(P_{ij}\) capturam sinergias.</p>
                 </section>
@@ -519,7 +933,7 @@
                 <section id="analise-coletivo" class="paper-section">
                     <h2>3. Análise Quantitativa Aprofundada</h2>
                     <h3>3.1 Cálculo de Valores Esperados</h3>
-                    <p>Para um estado geral \(\ket{\psi} = \sum_i c_i \ket{m_i}\):</p>
+                    <p>Para um estado geral \(|\psi\rangle = \sum_i c_i |m_i\rangle\):</p>
                     <div class="math-display">
                         \[ \langle \hat{P} \rangle_\psi = \sum_i |c_i|^2 P_{ii} + \sum_{i \neq j} c_i^* c_j P_{ij} \]
                     </div>
@@ -527,13 +941,13 @@
                     <h3>3.2 Caso 1: Adição Incoerente</h3>
                     <p>Numa mistura estatística (diversificação simples):</p>
                     <div class="math-display">
-                        \[ \langle \hat{P} \rangle_\rho = \frac{0.1 + 10 \times 0.01 \times 0.11}{1.1} P_{max} \approx 0.1009 P_{max} \]
+                        \[ \langle \hat{P} \rangle_\rho = \frac{0.1 + 10 \times 0.01 \times 0.11}{1.1} P_{\text{max}} \approx 0.1009 P_{\text{max}} \]
                     </div>
 
                     <h3>3.3 Caso 2: Superposição Coerente</h3>
-                    <p>Para um estado puro coerente com \(P_{CA} = 0.05 P_{max}\):</p>
+                    <p>Para um estado puro coerente com \(P_{CA} = 0.05 P_{\text{max}}\):</p>
                     <div class="math-display">
-                        \[ \langle \hat{P} \rangle_\psi = \frac{0.1 + 0.011 + 0.1}{1.1} P_{max} \approx 0.1918 P_{max} \]
+                        \[ \langle \hat{P} \rangle_\psi = \frac{0.1 + 0.011 + 0.1}{1.1} P_{\text{max}} \approx 0.1918 P_{\text{max}} \]
                     </div>
 
                     <h3>3.4 Análise de Sensibilidade</h3>
@@ -556,12 +970,12 @@
                 </section>
             </article>
 
-            <!-- ARTIGO 2: DOWNHILL -->
+            <!-- Artigo 2: Downhill -->
             <article id="downhill" class="article-content">
-                <header class="hero">
+                <div class="hero">
                     <h1>Modelagem Quântica do Potencial em Downhill</h1>
-                    <p style="font-size: 1.2rem; color: var(--text-muted);">Aplicação a Atletas de Alta Competição</p>
-                </header>
+                    <p>Aplicação a Atletas de Alta Competição</p>
+                </div>
 
                 <section id="abstract-downhill" class="paper-section">
                     <h2>Resumo Executivo</h2>
@@ -710,10 +1124,58 @@
     </footer>
 
     <script>
-        // CONFIGURAÇÃO INICIAL
+        // ============ SISTEMA DE MENU HAMBURGUER ============
+        const menuToggle = document.getElementById("menuToggle");
+        const menuOverlay = document.getElementById("menuOverlay");
+
+        // Função para alternar o menu
+        function toggleMenu() {
+            menuToggle.classList.toggle("active");
+            menuOverlay.classList.toggle("active");
+            
+            // Bloquear/desbloquear scroll do body
+            if (menuOverlay.classList.contains("active")) {
+                document.body.style.overflow = "hidden";
+            } else {
+                document.body.style.overflow = "auto";
+            }
+        }
+
+        // Event listeners
+        menuToggle.addEventListener("click", function(e) {
+            e.stopPropagation();
+            toggleMenu();
+        });
+
+        // Fechar menu ao clicar fora (no overlay)
+        menuOverlay.addEventListener("click", function(e) {
+            if (e.target === menuOverlay) {
+                toggleMenu();
+            }
+        });
+
+        // Fechar menu ao clicar em um item
+        document.querySelectorAll(".menu-item").forEach(item => {
+            item.addEventListener("click", function() {
+                toggleMenu();
+            });
+        });
+
+        // Efeitos hover nos itens do menu
+        document.querySelectorAll(".menu-item").forEach(item => {
+            item.addEventListener("mouseenter", function() {
+                this.style.transform = "translateY(-5px) scale(1.02)";
+            });
+            
+            item.addEventListener("mouseleave", function() {
+                this.style.transform = "translateY(0) scale(1)";
+            });
+        });
+
+        // ============ SISTEMA DE ARTIGOS ============
         let currentArticle = 'coletivo';
 
-        // FUNÇÕES DE CONTROLE DE ARTIGOS
+        // Função para mostrar artigo específico
         function showArticle(articleId) {
             // Esconder todos os artigos
             document.querySelectorAll('.article-content').forEach(article => {
@@ -723,7 +1185,7 @@
             // Mostrar artigo selecionado
             document.getElementById(articleId).classList.add('active');
             
-            // Atualizar botões do menu
+            // Atualizar botões do menu lateral
             document.querySelectorAll('.article-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.dataset.article === articleId) {
@@ -740,116 +1202,135 @@
             // Atualizar estado atual
             currentArticle = articleId;
             
-            // Rolar para o topo
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Rolar para o topo suavemente
+            window.scrollTo({ 
+                top: 0, 
+                behavior: 'smooth' 
+            });
+            
+            // Forçar MathJax a reprocessar fórmulas (sem usar typesetPromise)
+            if (window.MathJax && MathJax.typeset) {
+                MathJax.typeset();
+            }
         }
 
-        // NAVEGAÇÃO POR HASH (para links diretos)
-        function handleHashNavigation() {
-            const hash = window.location.hash.substring(1);
-            if (hash) {
-                // Verificar se o hash pertence ao artigo atual
-                const targetElement = document.getElementById(hash);
-                if (targetElement) {
-                    // Verificar se estamos no artigo certo
-                    const articleId = targetElement.closest('.article-content').id;
-                    if (articleId !== currentArticle) {
-                        showArticle(articleId);
-                    }
+        // Função para scroll suave para seções
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                // Verificar se a seção está no artigo atual
+                const article = section.closest('.article-content');
+                if (article && article.id !== currentArticle) {
+                    // Se não estiver, trocar para o artigo correto primeiro
+                    showArticle(article.id);
                     
-                    // Scroll para o elemento após um delay para carregar o artigo
+                    // Aguardar a troca e então fazer scroll
                     setTimeout(() => {
-                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                        const targetSection = document.getElementById(sectionId);
+                        if (targetSection) {
+                            targetSection.scrollIntoView({ 
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
                     }, 300);
+                } else {
+                    // Se já estiver no artigo correto, fazer scroll diretamente
+                    section.scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
                 }
             }
         }
 
-        // CONFIGURAR BOTÕES DO MENU
+        // Configurar botões do menu lateral
         document.querySelectorAll('.article-btn').forEach(button => {
             button.addEventListener('click', () => {
                 showArticle(button.dataset.article);
             });
         });
 
-        // CONFIGURAR LINKS DO SUMÁRIO
+        // Configurar links do sumário
         document.querySelectorAll('.toc-list a').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                const targetId = link.getAttribute('href').substring(1);
-                
-                // Verificar se o alvo está no artigo atual
-                const targetElement = document.getElementById(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: 'smooth' });
-                }
-                
-                // Atualizar URL sem recarregar
-                history.pushState(null, null, `#${targetId}`);
+                const targetId = link.getAttribute('onclick').match(/'([^']+)'/)[1];
+                scrollToSection(targetId);
             });
         });
 
-        // NAVEGAÇÃO COM BROWSER BACK/FORWARD
-        window.addEventListener('popstate', handleHashNavigation);
-
-        // INICIALIZAR
-        window.addEventListener('DOMContentLoaded', () => {
-            // Verificar hash inicial
-            if (window.location.hash) {
-                handleHashNavigation();
-            } else {
-                // Mostrar artigo coletivo por padrão
-                showArticle('coletivo');
-            }
-
-            // Efeito de Parallax
+        // ============ INICIALIZAÇÃO ============
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mostrar artigo coletivo por padrão
+            showArticle('coletivo');
+            
+            // Efeito de Parallax suave
             window.addEventListener('scroll', () => {
                 const scroll = window.pageYOffset;
-                document.querySelector('.bg-overlay').style.transform = `translateY(${scroll * 0.2}px)`;
+                const bgOverlay = document.querySelector('.bg-overlay');
+                if (bgOverlay) {
+                    bgOverlay.style.transform = `translateY(${scroll * 0.15}px)`;
+                }
             });
-
+            
             // Navegação Ativa no Sumário
+            let scrollTimeout;
             window.addEventListener('scroll', () => {
-                const articles = document.querySelectorAll(`#${currentArticle} .paper-section`);
+                const activeArticle = document.querySelector('.article-content.active');
+                if (!activeArticle) return;
+                
+                const sections = activeArticle.querySelectorAll('.paper-section');
                 const navLinks = document.querySelectorAll(`#toc-${currentArticle} .toc-list a`);
                 
-                let current = "";
-                articles.forEach(s => {
-                    if (window.pageYOffset >= s.offsetTop - 150) {
-                        current = s.getAttribute('id');
-                    }
-                });
-                
-                navLinks.forEach(l => {
-                    const href = l.getAttribute('href').substring(1);
-                    if (href === current) {
-                        l.style.color = "var(--primary)";
-                        l.style.fontWeight = "700";
-                    } else {
-                        l.style.color = "";
-                        l.style.fontWeight = "";
-                    }
-                });
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    let currentSection = "";
+                    const viewportMiddle = window.innerHeight / 2;
+                    
+                    sections.forEach(s => {
+                        const rect = s.getBoundingClientRect();
+                        if (rect.top <= viewportMiddle && rect.bottom >= viewportMiddle) {
+                            currentSection = s.getAttribute('id');
+                        }
+                    });
+                    
+                    navLinks.forEach(l => {
+                        const onclick = l.getAttribute('onclick');
+                        if (onclick) {
+                            const sectionId = onclick.match(/'([^']+)'/)[1];
+                            if (sectionId === currentSection) {
+                                l.style.color = "var(--primary)";
+                                l.style.fontWeight = "700";
+                            } else {
+                                l.style.color = "";
+                                l.style.fontWeight = "";
+                            }
+                        }
+                    });
+                }, 50);
             });
         });
 
-        // CARREGAMENTO DINÂMICO DE FÓRMULAS MATEMÁTICAS
-        MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']]
-            },
-            svg: {
-                fontCache: 'global'
-            },
-            startup: {
-                ready: () => {
-                    MathJax.startup.defaultReady();
-                    // Recarregar MathJax quando trocar de artigo
-                    MathJax.typesetPromise();
-                }
-            }
-        };
+        // ============ MATHJAX CONFIGURAÇÃO ============
+        // Aguardar MathJax carregar completamente
+        if (window.MathJax) {
+            MathJax.startup.promise.then(() => {
+                console.log('MathJax carregado com sucesso');
+            }).catch((err) => {
+                console.log('MathJax erro:', err);
+            });
+        }
+        
+        // Fallback para tiposetPromise se não existir
+        if (window.MathJax && !MathJax.typesetPromise && MathJax.typeset) {
+            MathJax.typesetPromise = function() {
+                return new Promise((resolve) => {
+                    MathJax.typeset();
+                    setTimeout(resolve, 100);
+                });
+            };
+        }
     </script>
 </body>
 </html>
